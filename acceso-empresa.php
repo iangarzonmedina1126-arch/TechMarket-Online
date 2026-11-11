@@ -1,7 +1,13 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Acceso empresarial | TechMarket</title><link rel="stylesheet" href="css/styles.css"><style>
 body{min-height:100vh;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);display:grid;place-items:center;padding:20px}.private-card{width:min(100%,490px);background:#fff;border-radius:22px;padding:32px;box-shadow:0 22px 65px #0004}.private-card h1{margin:0 0 8px}.private-card p{color:#64748b}.private-card label{display:block;margin:14px 0 6px;font-weight:600}.private-card input,.private-card select{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:10px;margin-top:6px}.private-card button{width:100%;margin-top:18px}.private-card .alert{color:#b91c1c;margin-top:12px}.private-card .muted{font-size:13px;color:#64748b}.brand{font-size:13px;letter-spacing:2px;color:#4f46e5;font-weight:800}.hide{display:none!important}
-</style></head><body><main class="private-card"><div class="brand">TECHMARKET ONLINE · ÁREA PRIVADA</div><h1 id="title">Acceso empresarial</h1><p id="subtitle">Ingresa con el correo y contraseña que te entregó el Jefe.</p><div id="formArea"><p>Comprobando configuración…</p></div><div id="error" class="alert" role="alert"></div><p class="muted">Esta pantalla es exclusiva para Jefe, Administradores y Empleados. Las cuentas de clientes no tienen acceso al panel.</p><a href="index.html" style="color:#4f46e5">← Volver a la tienda pública</a></main>
+</style></head><body><main class="private-card">
+  <div class="brand" id="companyBrand">
+    <img id="companyLogo" src="" alt="Logo de la empresa" class="hide">
+    <span id="companyName">TECHMARKET ONLINE</span>
+    <span>· ÁREA PRIVADA</span>
+</div>
+  <h1 id="title">Acceso empresarial</h1><p id="subtitle">Ingresa con el correo y contraseña que te entregó el Jefe.</p><div id="formArea"><p>Comprobando configuración…</p></div><div id="error" class="alert" role="alert"></div><p class="muted">Esta pantalla es exclusiva para Jefe, Administradores y Empleados. Las cuentas de clientes no tienen acceso al panel.</p><a href="index.html" style="color:#4f46e5">← Volver a la tienda pública</a></main>
 <script>
 const area=document.getElementById('formArea'),errorBox=document.getElementById('error');const params=new URLSearchParams(location.search);let needsSetup=false;
 function safeReturn(){const r=params.get('return')||'#/admin/dashboard';return r.startsWith('#/admin/')||r==='#/admin'?'index.html'+r:'index.html#/admin/dashboard'}

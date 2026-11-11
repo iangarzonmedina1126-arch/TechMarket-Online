@@ -1,0 +1,12 @@
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,Arial,sans-serif;background:#f1f5f9;color:#0f172a}
+.login-container{width:100%;max-width:440px;padding:42px 32px;text-align:center;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 15px 45px rgba(15,23,42,.08)}
+.brand{display:inline-block;color:#2563eb;font-size:32px;font-weight:800;text-decoration:none;margin-bottom:5px}
+.tagline,.intro,.note{color:#64748b}.tagline{margin-bottom:34px}
+h1{font-size:26px;margin-bottom:10px}.intro{line-height:1.5;margin-bottom:24px}
+#google-button{display:flex;justify-content:center}#mensaje,.error{color:#dc2626;font-size:14px;margin-top:18px;line-height:1.5}
+.profile-form{display:grid;gap:10px;text-align:left;margin-top:24px}
+.profile-form label{font-size:14px;font-weight:600}
+.profile-form input,.profile-form select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;margin-bottom:8px;background:#fff}
+.profile-form button,.logout{display:inline-block;padding:13px 18px;border:0;border-radius:8px;background:#2563eb;color:#fff;font:inherit;font-weight:700;text-decoration:none;text-align:center;cursor:pointer}
+.logout{margin-top:22px}

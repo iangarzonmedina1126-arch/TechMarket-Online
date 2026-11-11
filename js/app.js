@@ -11,7 +11,17 @@ const stockBadge=(a,min)=>a<=0?'<span class="b r">Sin stock</span>':a<=min?'<spa
 const low=()=>M.productos.r.filter(p=>p[4]<=3);
 /* ---------- TIENDA ---------- */
 const brandPlaceholder='<span class="brand-icon" data-brand-icon>▣</span>';
-function applyTheme(){const dark=localStorage.getItem('tm-theme')==='dark';document.documentElement.classList.toggle('theme-dark',dark);document.querySelectorAll('[data-theme-toggle]').forEach(b=>{b.textContent=dark?'☀️ Tema claro':'🌙 Tema oscuro';b.setAttribute('aria-label',dark?'Cambiar a tema claro':'Cambiar a tema oscuro');b.setAttribute('title',dark?'Cambiar a tema claro':'Cambiar a tema oscuro')})}
+function applyTheme(){
+    const dark = localStorage.getItem('tm-theme') !== 'light';
+
+    document.documentElement.classList.toggle('theme-dark', dark);
+
+    document.querySelectorAll('[data-theme-toggle]').forEach(b => {
+        b.textContent = dark ? '☀️ Tema claro' : '🌙 Tema oscuro';
+        b.setAttribute('aria-label', dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+        b.setAttribute('title', dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+    });
+}
 function toggleTheme(){const dark=!document.documentElement.classList.contains('theme-dark');localStorage.setItem('tm-theme',dark?'dark':'light');applyTheme()}
 async function applyBranding(){try{const r=await fetch('api_marca.php',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(d.logo_url){document.querySelectorAll('[data-brand-icon]').forEach(el=>{el.innerHTML=`<img src="${String(d.logo_url).replace(/"/g,'&quot;')}" alt="Logo TechMarket">`;});let link=document.querySelector('link[rel="icon"]');if(!link){link=document.createElement('link');link.rel='icon';document.head.appendChild(link)}link.href=d.logo_url;}const hero=document.getElementById('heroBrandArt');if(hero&&d.catalog_logo_url)hero.innerHTML=`<img class="catalog-brand-image" src="${String(d.catalog_logo_url).replace(/"/g,'&quot;')}" alt="Logo del catálogo">`;applyTheme();}catch(_){}}
 const nav=()=>`<div class="nav"><a class="logo" href="#/" onclick="scrollStoreTo('top',event)">${brandPlaceholder}TechMarket Online</a><div class="nav-search"><input id="tmSearch" placeholder="Buscar productos…" autocomplete="off" value="${escHtml(F.s||'')}" oninput="searchProducts(this.value)" onfocus="searchProducts(this.value)"><div id="tmSuggestions" class="search-suggestions" hidden></div></div><a href="#/" onclick="scrollStoreTo('top',event)">Inicio</a><a href="#/" onclick="scrollStoreTo('products',event)">Productos</a><a href="#/" onclick="scrollStoreTo('categories',event)">Categorías</a><a id="offersNav" href="#/" onclick="scrollStoreTo('offers',event)" hidden>Ofertas</a><a href="#/" onclick="scrollStoreTo('about',event)">Nosotros</a><a href="#/" onclick="scrollStoreTo('contact',event)">Contacto</a><button class="btn o theme-toggle" data-theme-toggle onclick="toggleTheme()">Tema</button><a href="#/carrito">🛒 Carrito <b id="cc">${cartCount()}</b></a>${window.tmCustomer?`<a class="btn" href="#/cuenta">Mi cuenta</a>`:`<a class="btn" href="#/login">Iniciar sesión</a>`}</div>`;
@@ -103,7 +113,20 @@ function mapApiProducts(products){
     Number(p.descuento_porcentaje || 0)
   ]);
 }
-function selectCategory(name){F.cat=name;window._tmCategoryFilterNames=[name];drawGrid()}
+function selectCategory(name){
+    F.cat = name;
+    window._tmCategoryFilterNames = [name];
+    F.s = '';
+
+    const search = document.getElementById('tmSearch');
+    if (search) search.value = '';
+
+    drawGrid();
+
+    document.getElementById('productsSection')?.scrollIntoView({
+        behavior: 'smooth'
+    });
+}
 function openCategoryCatalog(){
   const cats=Array.isArray(window._tmAllCategories)&&window._tmAllCategories.length?window._tmAllCategories:CATS.map((c,i)=>({id_categoria:i+1,id_categoria_principal:null,nombre:c[0]}));
   const roots=cats.filter(c=>!Number(c.id_categoria_principal||0));
@@ -143,7 +166,8 @@ async function loadAdminProducts(){
 function footerGo(category,event){if(event)event.preventDefault();if(category==='all'){F.cat='';window._tmCategoryFilterNames=null;}else{const aliases={Laptops:'Computadores'};F.cat=aliases[category]||category;window._tmCategoryFilterNames=[F.cat];}if(location.hash!=='#/'){location.hash='#/';setTimeout(()=>{drawGrid();document.getElementById('productsSection')?.scrollIntoView({behavior:'smooth'});},220);}else{drawGrid();document.getElementById('productsSection')?.scrollIntoView({behavior:'smooth'});}}
 function footerAccount(section,event){if(event)event.preventDefault();if(!window.tmCustomer){location.hash='#/login';return;}location.hash='#/cuenta';setTimeout(()=>{const ids={returns:'customerReturns',warranties:'customerWarranties',contact:'customerSupport',help:'customerSupport'};document.getElementById(ids[section]||'customerSupport')?.scrollIntoView({behavior:'smooth',block:'start'});},350);}
 function store(){$('#app').innerHTML=nav()+`<div class="hero"><div><h1>Tecnología de última generación</h1><p>Laptops, celulares, impresoras y licencias con garantía oficial y entrega a nivel nacional.</p><p><button class="btn" onclick="openCategoryCatalog()">Ver catálogo</button> <button id="heroOffers" class="btn o" style="color:#0f172a" hidden onclick="scrollStoreTo('offers',event)">Ver ofertas</button></p></div><div class="art catalog-brand-area" id="heroBrandArt"><span class="catalog-placeholder">💻</span></div></div>
-<div class="wrap"><div class="sec" id="categoriesSection"><h2>Categorías</h2><a style="color:var(--blue)" onclick="F.cat='';drawGrid();document.getElementById('productsSection')?.scrollIntoView({behavior:'smooth'})">Ver todas</a></div><div class="cats">${CATS.map(c=>`<div class="cat" onclick="F.cat='${c[0]}';drawGrid();document.getElementById('productsSection')?.scrollIntoView({behavior:'smooth'})"><span>${c[1]}</span>${c[0]}</div>`).join('')}</div>
+<div class="wrap"><div class="sec" id="categoriesSection"><h2>Categorías</h2><a style="color:var(--blue)" onclick="F.cat='';drawGrid();document.getElementById('productsSection')?.scrollIntoView({behavior:'smooth'})">Ver todas</a></div>
+<div class="cats">${CATS.map(c=>`<div class="cat" onclick="selectCategory('${escHtml(c[0])}')"><span>${c[1]}</span>${c[0]}</div>`).join('')}</div>
 <div class="sec offers-heading" id="offersSection" hidden style="margin-top:28px"><h2>🔥 Mega ofertas</h2></div><div class="grid" id="offersGrid" hidden></div><div class="sec" id="productsSection" style="margin-top:28px"><h2>Productos destacados</h2></div><div class="grid" id="grid"><p>Cargando catálogo real de MySQL…</p></div>
 <div class="sec" style="margin-top:28px"><h2>Pocas unidades disponibles</h2></div><div class="grid" id="lowGrid"><p>Cargando inventario…</p></div></div>
 <footer class="tm-footer" id="aboutSection"><div class="tm-footer-brand"><b>TechMarket Online</b><p>Tecnología para tu día a día.</p><small>Encuentra tus productos, consulta tus compras y gestiona tus solicitudes desde tu cuenta.</small></div><div class="tm-footer-links"><b>Comprar</b><a href="#productsSection" onclick="footerGo('all',event)">Ver catálogo</a><a href="#productsSection" onclick="footerGo('Laptops',event)">Laptops</a><a href="#productsSection" onclick="footerGo('Celulares',event)">Celulares</a><a href="#productsSection" onclick="footerGo('Impresoras',event)">Impresoras</a></div><div class="tm-footer-links" id="contactSection"><b>Atención al cliente</b><a href="#/cuenta" onclick="footerAccount('help',event)">Centro de ayuda</a><a href="#/cuenta" onclick="footerAccount('returns',event)">Devoluciones</a><a href="#/cuenta" onclick="footerAccount('warranties',event)">Garantías</a><a href="#/cuenta" onclick="footerAccount('contact',event)">Contacto y soporte</a></div></footer>`;F.cat='';applyBranding();loadCatalogFromApi()}

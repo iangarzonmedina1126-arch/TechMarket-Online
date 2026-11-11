@@ -184,3 +184,48 @@ html.theme-dark .dash-month-detail{background:#0b1220}html.theme-dark .catalog-c
 /* Buscadores administrativos: escritura estable y cursor en su posicion */
 .admin-module-search,.inventory-search,.tools input[type="search"],.tools input:not([type]){direction:ltr!important;text-align:left!important;unicode-bidi:plaintext;caret-color:var(--blue);box-sizing:border-box}
 .admin-module-search::placeholder,.inventory-search::placeholder{direction:ltr;text-align:left}
+
+/* Identidad de empresa en la pantalla de acceso */
+#companyBrand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 17px;
+    color: var(--dark);
+    margin-bottom: 12px;
+}
+
+#companyLogo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+#companyLogo.hide {
+    display: none !important;
+}
+
+#companyName {
+    font-weight: 800;
+}
+
+html.theme-dark #companyBrand {
+    color: var(--ink);
+}
+
+@media (max-width: 480px) {
+    #companyBrand {
+        font-size: 15px;
+    }
+
+    #companyLogo {
+        width: 40px;
+        height: 40px;
+    }
+}

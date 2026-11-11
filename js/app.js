@@ -225,6 +225,8 @@ async function customerAccount(){
       </div>
       <section class="panel" id="customerSupport" style="margin-top:20px"><h2>Atención al cliente</h2><p>Envía una consulta sobre una compra y el equipo podrá responder desde el sistema.</p><div class="fg"><label>Compra relacionada<select id="supportSale">${orders.filter(o=>Number(o.id_venta)>0).map(o=>`<option value="${Number(o.id_venta)}">${escHtml(o.numero_comprobante||('Compra '+o.id_venta))} · ${money(o.total)}</option>`).join('')}</select></label><label>Asunto<input id="supportSubject" maxlength="120" placeholder="Ej. Consulta sobre mi compra"></label><label class="f">¿Cómo podemos ayudarte?<textarea id="supportDescription" maxlength="255" rows="3" placeholder="Escribe tu consulta"></textarea></label></div><p id="supportError" style="color:#b91c1c"></p><button class="btn" onclick="sendCustomerSupport()">Enviar consulta</button><h3 style="margin-top:20px">Mis consultas</h3>${tickets.map(t=>`<div class="customer-request-card"><b>${escHtml(t.asunto)}</b><p>${escHtml(t.numero_comprobante||'Compra')}</p><p>${escHtml(t.descripcion)}</p><p>${bdg(t.estado)} · ${escHtml(t.fecha_apertura||'')}</p>${t.fecha_cierre?`<small>Fecha de cierre: ${escHtml(t.fecha_cierre)}</small>`:''}</div>`).join('')||'<p>Aún no has enviado consultas.</p>'}</section>
     </div>`;
+    // La navegación se vuelve a crear al abrir Mi cuenta; reaplicamos el logo configurado.
+    await applyBranding();
   }catch(e){$('#app').innerHTML=nav()+`<div class="auth"><p>No se pudo cargar tu cuenta: ${escHtml(e.message||'Error')}</p><button class="btn" onclick="customerAccount()">Reintentar</button></div>`}
 }
 function viewPurchaseTicket(index){

@@ -1,9 +1,30 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8">
+<html lang="es">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TechMarket Online</title>
-<link rel="stylesheet" href="css/styles.css?v=20261106-ticket-search-v2">
-</head><body>
-<div id="app"></div><div id="modal"></div><div id="toast"></div>
-<script src="js/data.js?v=20261106-ticket-search-v2"></script><script src="js/app.js?v=20261106-ticket-search-v2"></script>
-</body></html>
+
+<script>
+try {
+    const savedTheme = localStorage.getItem('tm-theme');
+    document.documentElement.classList.toggle(
+        'theme-dark',
+        savedTheme !== 'light'
+    );
+} catch (error) {
+    document.documentElement.classList.add('theme-dark');
+}
+</script>
+
+<link rel="stylesheet" href="css/styles.css?v=20261111-categories-dark-theme">
+</head>
+<body>
+<div id="app"></div>
+<div id="modal"></div>
+<div id="toast"></div>
+
+<script src="js/data.js?v=20261111-categories-dark-theme"></script>
+<script src="js/app.js?v=20261111-categories-dark-theme"></script>
+</body>
+</html>

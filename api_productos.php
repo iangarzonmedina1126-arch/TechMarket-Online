@@ -93,6 +93,30 @@ try {
     }
     unset($producto);
 
+    // Correcciones específicas para los productos que tenían fotografías rotas.
+    // Se relacionan por nombre para no depender de IDs variables ni modificar MySQL.
+    $imageOverridesByName = [
+        'Lenovo IdeaPad Slim 3 15.6' => 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=85',
+        'Acer Nitro V Gaming' => 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=900&q=85',
+        'Disco externo 2 TB' => 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=900&q=85',
+        'Router Wi-Fi 6 doble banda' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=85',
+        'HP LaserJet Pro monocromática' => 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=900&q=85',
+        'Epson EcoTank multifuncional' => 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=900&q=85',
+        'Cartucho HP tricolor' => 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=900&q=85',
+        'Tóner compatible HP 35A' => 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=900&q=85',
+        'iPhone 15 128 GB' => 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=85',
+        'Smart TV 43 pulgadas 4K' => 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=900&q=85',
+        'Consola PlayStation 5' => 'https://images.unsplash.com/photo-1486572788966-cfd3df1f5b42?auto=format&fit=crop&w=900&q=85',
+        'Controlador arcade USB' => 'https://images.unsplash.com/photo-1486572788966-cfd3df1f5b42?auto=format&fit=crop&w=900&q=85',
+    ];
+    foreach ($productos as &$producto) {
+        $productName = trim((string)($producto['nombre'] ?? ''));
+        if (isset($imageOverridesByName[$productName])) {
+            $producto['imagen_url'] = $imageOverridesByName[$productName];
+        }
+    }
+    unset($producto);
+
     echo json_encode($productos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 } catch (Throwable $e) {
     http_response_code(500);

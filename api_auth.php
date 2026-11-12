@@ -38,6 +38,32 @@ if ($action==='setup_owner') {
     session_regenerate_id(true);unset($_SESSION['tm_cliente_id']);$_SESSION['tm_user_id']=(int)$conexion->lastInsertId();
     auth_out(201,['ok'=>true,'user'=>['id'=>(int)$_SESSION['tm_user_id'],'correo'=>$email,'rol'=>'Jefe'],'message'=>'Cuenta Jefe creada. Guarda tus credenciales en un lugar seguro.']);
 }
+if ($action==='recover_owner') {
+    if (ownerExists($conexion)) auth_out(409,['error'=>'Ya existe una cuenta Jefe activa. Inicia sesión normalmente.']);
+    $email=filter_var(trim((string)($d['correo']??'')),FILTER_VALIDATE_EMAIL);
+    $pass=(string)($d['contrasena']??'');
+    if (!$email || $pass==='') auth_out(422,['error'=>'Escribe el correo y la contraseña actual de tu cuenta.']);
+    $q=$conexion->prepare("SELECT id_usuario,correo,contrasena,estado,rol FROM usuario WHERE correo=? LIMIT 1");
+    $q->execute([$email]);
+    $u=$q->fetch(PDO::FETCH_ASSOC);
+    if (!$u || (int)$u['estado']!==1 || !in_array($u['rol'],['Administrador','Empleado','Staff'],true)) auth_out(401,['error'=>'No se encontró una cuenta empresarial activa para recuperar.']);
+    $valid=password_verify($pass,(string)$u['contrasena']);
+    if (!$valid && hash_equals((string)$u['contrasena'],$pass)) {
+        $valid=true;
+        $upd=$conexion->prepare('UPDATE usuario SET contrasena=? WHERE id_usuario=?');
+        $upd->execute([password_hash($pass,PASSWORD_DEFAULT),(int)$u['id_usuario']]);
+    }
+    if (!$valid) auth_out(401,['error'=>'La contraseña actual no es correcta.']);
+    $conexion->beginTransaction();
+    $lock=$conexion->query("SELECT id_usuario FROM usuario WHERE rol='Jefe' AND estado=1 LIMIT 1 FOR UPDATE")->fetchColumn();
+    if ($lock) { $conexion->rollBack(); auth_out(409,['error'=>'Ya existe una cuenta Jefe activa. Inicia sesión normalmente.']); }
+    $upd=$conexion->prepare("UPDATE usuario SET rol='Jefe' WHERE id_usuario=? AND estado=1 AND rol IN ('Administrador','Empleado','Staff')");
+    $upd->execute([(int)$u['id_usuario']]);
+    if ($upd->rowCount()!==1) { $conexion->rollBack(); auth_out(409,['error'=>'No se pudo recuperar la cuenta. Actualiza la página e inténtalo de nuevo.']); }
+    $conexion->commit();
+    session_regenerate_id(true);unset($_SESSION['tm_cliente_id']);$_SESSION['tm_user_id']=(int)$u['id_usuario'];
+    auth_out(200,['ok'=>true,'user'=>['id'=>(int)$u['id_usuario'],'correo'=>$u['correo'],'rol'=>'Jefe'],'message'=>'La cuenta existente recuperó el rol Jefe. La contraseña se mantuvo sin cambios.']);
+}
 if ($action==='login') {
     $email=filter_var(trim((string)($d['correo']??'')),FILTER_VALIDATE_EMAIL);$pass=(string)($d['contrasena']??'');
     if (!$email || $pass==='') auth_out(422,['error'=>'Escribe tu correo empresarial y contraseña.']);

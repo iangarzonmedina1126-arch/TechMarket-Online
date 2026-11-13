@@ -2,8 +2,10 @@
 // Seguridad de sesiones para el panel administrativo de TechMarket Online.
 if (session_status() !== PHP_SESSION_ACTIVE) {
     ini_set('session.use_strict_mode', '1');
+    // Mantiene la sesión durante 30 días incluso si el visitante cierra el navegador.
+    ini_set('session.gc_maxlifetime', '2592000');
     session_set_cookie_params([
-        'lifetime' => 0,
+        'lifetime' => 2592000,
         'path' => '/',
         'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
         'httponly' => true,

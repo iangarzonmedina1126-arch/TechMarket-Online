@@ -6,15 +6,8 @@
 <title>TechMarket Online</title>
 
 <script>
-try {
-    const savedTheme = localStorage.getItem('tm-theme');
-    document.documentElement.classList.toggle(
-        'theme-dark',
-        savedTheme !== 'light'
-    );
-} catch (error) {
-    document.documentElement.classList.add('theme-dark');
-}
+document.documentElement.classList.add('theme-dark');
+try { localStorage.removeItem('tm-theme'); } catch (error) {}
 </script>
 
 <link rel="icon" id="tmFavicon" href="data:,">

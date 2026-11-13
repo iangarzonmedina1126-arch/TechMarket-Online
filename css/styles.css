@@ -229,3 +229,9 @@ html.theme-dark #companyBrand {
         height: 40px;
     }
 }
+
+
+/* Ajustes de contacto en el pie de página */
+.tm-footer{grid-template-columns:1fr 1.2fr;}
+.tm-contact-copy{margin:0;color:#cbd5e1;font-size:13px;line-height:1.6;max-width:480px}
+@media(max-width:700px){.tm-footer{grid-template-columns:1fr}.tm-footer-brand{grid-column:auto}}

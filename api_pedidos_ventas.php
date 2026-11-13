@@ -87,7 +87,7 @@ try {
 
         if ($vista === 'devoluciones') {
             $ventas = $conexion->query("SELECT v.id_venta, v.id_pedido, v.numero_comprobante, v.fecha_venta, v.total, p.estado AS estado_pedido,
-                    COALESCE(pc.nombre_completo, CONCAT('Cliente #', c.id_cliente)) AS cliente, c.id_cliente,
+                    COALESCE(pc.nombre_completo, CONCAT(c.nombre,' ',c.apellidos)) AS cliente, c.id_cliente,
                     GROUP_CONCAT(DISTINCT CONCAT(pr.id_producto, ': ', pr.nombre) ORDER BY pr.nombre SEPARATOR ' | ') AS productos
                 FROM ventas v INNER JOIN pedidos p ON p.id_pedido = v.id_pedido INNER JOIN cliente c ON c.id_cliente = v.id_cliente
                 LEFT JOIN pedido_contacto pc ON pc.id_pedido = p.id_pedido
@@ -95,12 +95,12 @@ try {
                 WHERE p.estado = 'Entregado' GROUP BY v.id_venta, v.id_pedido, v.numero_comprobante, v.fecha_venta, v.total, p.estado, pc.nombre_completo, c.id_cliente
                 ORDER BY v.id_venta DESC")->fetchAll(PDO::FETCH_ASSOC);
             $devoluciones = $conexion->query("SELECT d.id_devolucion, d.id_venta, v.id_pedido, v.numero_comprobante, d.motivo, d.monto_reembolsado,
-                    d.fecha_devolucion, d.estado, COALESCE(pc.nombre_completo, CONCAT('Cliente #', c.id_cliente)) AS cliente, v.total
+                    d.fecha_devolucion, d.estado, COALESCE(pc.nombre_completo, CONCAT(c.nombre,' ',c.apellidos)) AS cliente, v.total
                 FROM devolucion d INNER JOIN ventas v ON v.id_venta = d.id_venta INNER JOIN cliente c ON c.id_cliente = d.id_cliente
                 LEFT JOIN pedido_contacto pc ON pc.id_pedido = v.id_pedido ORDER BY d.id_devolucion DESC")->fetchAll(PDO::FETCH_ASSOC);
             $garantias = $conexion->query("SELECT g.id_garantia, g.id_venta, v.id_pedido, v.numero_comprobante, g.id_producto, pr.nombre AS producto,
                     g.motivo, COALESCE(g.diagnostico,'') AS diagnostico, g.estado, g.fecha_solicitud, g.fecha_cierre,
-                    COALESCE(pc.nombre_completo, CONCAT('Cliente #', c.id_cliente)) AS cliente
+                    COALESCE(pc.nombre_completo, CONCAT(c.nombre,' ',c.apellidos)) AS cliente
                 FROM garantia_solicitud g INNER JOIN ventas v ON v.id_venta = g.id_venta INNER JOIN cliente c ON c.id_cliente = g.id_cliente
                 INNER JOIN productos pr ON pr.id_producto = g.id_producto LEFT JOIN pedido_contacto pc ON pc.id_pedido = v.id_pedido
                 ORDER BY g.id_garantia DESC")->fetchAll(PDO::FETCH_ASSOC);
@@ -111,7 +111,7 @@ try {
         if ($vista === 'pagos') {
             $sql = "SELECT v.id_venta, v.id_pedido, v.numero_comprobante, v.fecha_venta, v.total,
                            p.estado AS estado_pedido,
-                           COALESCE(pc.nombre_completo, CONCAT('Cliente #', c.id_cliente)) AS cliente,
+                           COALESCE(pc.nombre_completo, CONCAT(c.nombre,' ',c.apellidos)) AS cliente,
                            c.correo,
                            COALESCE(pc.metodo_pago, 'No especificado') AS metodo_pago,
                            COALESCE(pg.estado_pago, CASE WHEN pc.metodo_pago LIKE 'Contraentrega%' THEN 'Pendiente de cobro' WHEN pc.metodo_pago LIKE 'Transferencia%' THEN 'Pendiente de verificación' WHEN pc.metodo_pago LIKE 'Tarjeta%' THEN 'Pendiente de confirmación' ELSE 'Pendiente' END) AS estado_pago,
@@ -128,7 +128,7 @@ try {
 
         if ($vista === 'ventas') {
             $sql = "SELECT v.id_venta, v.id_pedido, v.numero_comprobante, v.fecha_venta, v.total,
-                           p.estado AS estado_pedido, COALESCE(pc.nombre_completo, CONCAT('Cliente #', c.id_cliente)) AS cliente,
+                           p.estado AS estado_pedido, COALESCE(pc.nombre_completo, CONCAT(c.nombre,' ',c.apellidos)) AS cliente,
                            c.correo, COALESCE(pc.metodo_pago, 'No especificado') AS metodo_pago,
                            COALESCE(pg.estado_pago, CASE WHEN pc.metodo_pago LIKE 'Contraentrega%' THEN 'Pendiente de cobro' WHEN pc.metodo_pago LIKE 'Transferencia%' THEN 'Pendiente de verificación' WHEN pc.metodo_pago LIKE 'Tarjeta%' THEN 'Pendiente de confirmación' ELSE 'Pendiente' END) AS estado_pago, pg.fecha_pago
                     FROM ventas v
@@ -170,7 +170,7 @@ try {
             $stmtProd = $conexion->prepare("SELECT pr.id_producto, pr.nombre AS producto, COALESCE(SUM(d.cantidad),0) AS unidades, COALESCE(SUM(d.total),0) AS importe FROM detalle_de_pedido d INNER JOIN productos pr ON pr.id_producto = d.id_producto INNER JOIN pedidos p ON p.id_pedido = d.id_pedido INNER JOIN ventas v ON v.id_pedido = p.id_pedido".$productWhereSql." GROUP BY pr.id_producto, pr.nombre ORDER BY unidades DESC, importe DESC LIMIT 10");
             $stmtProd->execute($productParams);
             $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
-            $stmtDetalle = $conexion->prepare("SELECT v.id_venta, v.id_pedido, v.numero_comprobante, v.fecha_venta, COALESCE(pc.nombre_completo, CONCAT('Cliente #', c.id_cliente)) AS cliente, v.total, p.estado AS estado_pedido, COALESCE(pc.metodo_pago,'No especificado') AS metodo_pago, COALESCE(pg.estado_pago, CASE WHEN pc.metodo_pago LIKE 'Contraentrega%' THEN 'Pendiente de cobro' WHEN pc.metodo_pago LIKE 'Transferencia%' THEN 'Pendiente de verificación' WHEN pc.metodo_pago LIKE 'Tarjeta%' THEN 'Pendiente de confirmación' ELSE 'Pendiente' END) AS estado_pago".$base." INNER JOIN cliente c ON c.id_cliente = v.id_cliente LEFT JOIN pedido_contacto pc ON pc.id_pedido = p.id_pedido".$whereSql." ORDER BY v.fecha_venta DESC, v.id_venta DESC");
+            $stmtDetalle = $conexion->prepare("SELECT v.id_venta, v.id_pedido, v.numero_comprobante, v.fecha_venta, COALESCE(pc.nombre_completo, CONCAT(c.nombre,' ',c.apellidos)) AS cliente, v.total, p.estado AS estado_pedido, COALESCE(pc.metodo_pago,'No especificado') AS metodo_pago, COALESCE(pg.estado_pago, CASE WHEN pc.metodo_pago LIKE 'Contraentrega%' THEN 'Pendiente de cobro' WHEN pc.metodo_pago LIKE 'Transferencia%' THEN 'Pendiente de verificación' WHEN pc.metodo_pago LIKE 'Tarjeta%' THEN 'Pendiente de confirmación' ELSE 'Pendiente' END) AS estado_pago".$base." INNER JOIN cliente c ON c.id_cliente = v.id_cliente LEFT JOIN pedido_contacto pc ON pc.id_pedido = p.id_pedido".$whereSql." ORDER BY v.fecha_venta DESC, v.id_venta DESC");
             $stmtDetalle->execute($params);
             respuesta(200, ['resumen'=>$resumen, 'por_mes'=>$porMes, 'por_metodo'=>$porMetodo, 'productos_mas_vendidos'=>$productos, 'ventas'=>$stmtDetalle->fetchAll(PDO::FETCH_ASSOC)]);
         }
@@ -179,7 +179,7 @@ try {
                        c.correo AS cliente_correo, c.telefono AS cliente_telefono,
                        c.tipo_documento, c.numero_documento,
                        u.direccion_linea, u.ciudad, u.departamento, u.codigo_postal, u.referencia,
-                       COALESCE(pc.nombre_completo, CONCAT('Cliente #', c.id_cliente)) AS cliente_nombre,
+                       COALESCE(pc.nombre_completo, CONCAT(c.nombre,' ',c.apellidos)) AS cliente_nombre,
                        COALESCE(pc.metodo_pago, 'No especificado') AS metodo_pago,
                        v.id_venta, v.numero_comprobante, COALESCE(pg.estado_pago, CASE WHEN pc.metodo_pago LIKE 'Contraentrega%' THEN 'Pendiente de cobro' WHEN pc.metodo_pago LIKE 'Transferencia%' THEN 'Pendiente de verificación' WHEN pc.metodo_pago LIKE 'Tarjeta%' THEN 'Pendiente de confirmación' ELSE 'Pendiente' END) AS estado_pago
                 FROM pedidos p

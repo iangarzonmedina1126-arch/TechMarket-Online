@@ -128,11 +128,12 @@ function categoryHasProducts(category){
   return M.productos.r.some(p=>p[6]==='Activo'&&categoryKey(p[1])===aliases);
 }
 function categoryDescendants(id,cats=window._tmAllCategories||[]){
-  const result=[];
+  const result=[],visited=new Set([Number(id)]);
   const visit=parentId=>{
     cats.filter(c=>Number(c.id_categoria_principal||0)===Number(parentId)).forEach(child=>{
-      if(!result.some(x=>Number(x.id_categoria)===Number(child.id_categoria)))result.push(child);
-      visit(child.id_categoria);
+      const childId=Number(child.id_categoria);
+      if(visited.has(childId))return;
+      visited.add(childId);result.push(child);visit(childId);
     });
   };
   visit(id);
@@ -172,11 +173,11 @@ async function loadCatalogFromApi(){
     // Carga productos y categorías en paralelo para evitar una espera secuencial.
     const [response, categoryResponse] = await Promise.all([
       fetch('api_productos.php', {cache:'no-store'}),
-      fetch('api_categorias.php', {cache:'no-store'})
+      fetch('api_categorias.php', {cache:'no-store'}).catch(()=>null)
     ]);
     if (!response.ok) throw new Error('La API respondió ' + response.status);
     mapApiProducts(await response.json());catalogFromDb=true;
-    if(categoryResponse.ok)applyCategories(await categoryResponse.json());
+    if(categoryResponse?.ok)applyCategories(await categoryResponse.json());
     drawGrid();
     const offersGrid=$('#offersGrid'),offersSection=$('#offersSection');if(offersGrid&&offersSection){const offers=M.productos.r.filter(p=>p[6]==='Activo'&&Number(p[8]||0)>0).sort((a,b)=>Number(b[8])-Number(a[8]));const activeOffers=offers.slice(0,8);offersSection.hidden=activeOffers.length===0;offersGrid.hidden=activeOffers.length===0;offersGrid.innerHTML=activeOffers.map(card).join('');const offersNav=document.getElementById('offersNav');if(offersNav)offersNav.hidden=activeOffers.length===0;const heroOffers=document.getElementById('heroOffers');if(heroOffers)heroOffers.hidden=activeOffers.length===0;}
     const lowGrid = $('#lowGrid');
@@ -201,7 +202,7 @@ function store(){$('#app').innerHTML=nav()+`<div class="hero"><div><h1>Tecnolog�
 <div class="cats">${CATS.map(c=>`<div class="cat" onclick="selectCategory('${escHtml(c[0])}')"><span>${c[1]}</span>${c[0]}</div>`).join('')}</div>
 <div class="sec offers-heading" id="offersSection" hidden style="margin-top:28px"><h2>🔥 Mega ofertas</h2></div><div class="grid" id="offersGrid" hidden></div><div class="sec" id="productsSection" style="margin-top:28px"><h2>Productos destacados</h2></div><div class="grid" id="grid"><p>Cargando catálogo real de MySQL…</p></div>
 <div class="sec" style="margin-top:28px"><h2>Pocas unidades disponibles</h2></div><div class="grid" id="lowGrid"><p>Cargando inventario…</p></div></div>
-<footer class="tm-footer"><div class="tm-footer-brand"><b data-company-name>TechMarket Online</b><p>Tecnología para tu día a día.</p><small>Encuentra tus productos, consulta tus compras y gestiona tus solicitudes desde tu cuenta.</small></div><div class="tm-footer-links" id="contactSection"><b>Contacto y atención al cliente</b><p class="tm-contact-copy">Para consultas sobre pedidos, garantías y devoluciones, ingresa a tu cuenta o comunícate con nuestro equipo.</p><a href="#/cuenta" onclick="footerAccount('help',event)">Centro de ayuda</a><a href="#/cuenta" onclick="footerAccount('returns',event)">Devoluciones</a><a href="#/cuenta" onclick="footerAccount('warranties',event)">Garantías</a><a href="#/cuenta" onclick="footerAccount('contact',event)">Contacto y soporte</a></div></footer>`;F.cat='';applyBranding();loadCatalogFromApi()}
+<footer class="tm-footer"><div class="tm-footer-brand"><b data-company-name>TechMarket Online</b><p>Tecnología para tu día a día.</p><small>Encuentra tus productos, consulta tus compras y gestiona tus solicitudes desde tu cuenta.</small></div><div class="tm-footer-links" id="contactSection"><b>Contacto y atención al cliente</b><p class="tm-contact-copy">Estamos disponibles para ayudarte con tus compras, pedidos, garantías y devoluciones.</p><span>📞 Teléfono provisional: <a href="tel:+573000000000">+57 300 000 0000</a></span><span>✉️ Correo: <a href="mailto:iangarzon@tecnonova.com">iangarzon@tecnonova.com</a></span><a href="#/cuenta" onclick="footerAccount('help',event)">Centro de ayuda</a><a href="#/cuenta" onclick="footerAccount('returns',event)">Devoluciones</a><a href="#/cuenta" onclick="footerAccount('warranties',event)">Garantías</a><a href="#/cuenta" onclick="footerAccount('contact',event)">Contacto y soporte</a></div></footer>`;F.cat='';applyBranding();loadCatalogFromApi()}
 /* ---------- AUTENTICACIÓN ---------- */
 function login(){$('#app').innerHTML=nav()+`<div class="auth"><h2>Bienvenido de nuevo</h2><div id="googleSignIn" style="margin:8px 0;display:flex;justify-content:center"></div><div id="googleDivider" style="text-align:center;margin:8px 0;color:#64748b;display:none">o continúa con tu correo</div><label>Correo electrónico<input id="em" type="email" autocomplete="email" placeholder="Correo electrónico" required></label><label>Contraseña<input id="pw" type="password" autocomplete="current-password" placeholder="Contraseña" required></label><button class="btn" onclick="doLogin()">Iniciar sesión</button><p id="authError" style="color:#b91c1c"></p><div style="text-align:center;margin-top:6px"><span style="color:#64748b">¿No tienes cuenta?</span> <a style="color:var(--blue);font-weight:600" href="#/registro">Crear cuenta</a></div></div>`;setupGoogleButton('googleSignIn')}
 let tmGoogleScriptPromise=null;
